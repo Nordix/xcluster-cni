@@ -30,7 +30,7 @@ form environment variables. It then does something CNI-plugin specific
 and emits the result on *stdout*. Configuration and result is in
 `json` format;
 
-<img src="cni-plugin.svg" alt="A CNI-plugin figure" width="80%" />
+<img src="cni-plugin.svg" alt="A CNI-plugin figure" width="100%" />
 
 
 ### Try yourself
