@@ -7,6 +7,8 @@ This is the basic CNI-plugin used in
 a very simple CNI-plugin which makes it suitable for experiments and
 as an introduction to container networking in Kubernetes.
 
+**NOTE:** `xcluster-cni` is not intended for K8s clusters in production!
+
 `xcluster-cni` is a meta CNI-plugin and uses;
 
 * [bridge plugin](https://github.com/containernetworking/plugins/tree/master/plugins/main/bridge)
@@ -37,7 +39,7 @@ The example shows a limitation that exist for dual-stack in k8s
 and ipv6 individually. So the same mask must be used. This will be
 fixed in k8s dual-stack phase 3. But beside beeing a bit odd, it works.
 
-With the setting above K8s will allocate address ranges (CIDR) for all
+With the setting above K8s will allocate address ranges (CIDRs) for all
 nodes;
 
 ```
@@ -81,9 +83,9 @@ node (`podCIDR` is for backward compatibility). Now we just have to
 make sure that the `host-local` IPAM-plugin is configured with these
 ranges on each node.
 
-For inter-node connectivity we know the POD address ranges and the
-nodes they are assigned to. It is just a matter of setting up ipv4 and
-ipv6 routes. Example;
+For inter-node connectivity we know the POD CIDRs and the nodes they
+are assigned to. It is just a matter of setting up ipv4 and ipv6
+routes. Example;
 
 ```
 vm-003 # ip -6 ro
@@ -93,8 +95,9 @@ vm-003 # ip -6 ro
 1100:400::/24 via 1000::1:c0a8:101 dev eth1 metric 1024 pref medium
 ```
 
-The principles are simple. It is `xcluster-cni's job to make this
-automatic.
+This is enough. The principles are simple. It is `xcluster-cni`'s job
+to make this automatic.
+
 
 
 ## Container Network Interface (CNI)
