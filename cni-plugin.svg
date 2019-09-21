@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1108.0023"
+   height="470.75781"
+   viewBox="0 0 1108.0023 470.75781"
+   version="1.1"
+   id="SVGRoot"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="cni-plugin.svg">
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="543.82344"
+     inkscape:cy="298.60002"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1717"
+     inkscape:window-height="1046"
+     inkscape:window-x="165"
+     inkscape:window-y="55"
+     inkscape:window-maximized="0"
+     fit-margin-left="10"
+     fit-margin-top="10"
+     fit-margin-right="10"
+     fit-margin-bottom="10" />
+  <defs
+     id="defs3737">
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path887"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="DotL"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5317"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5315"
+         d="m -2.5,-1 c 0,2.76 -2.24,5 -5,5 -2.76,0 -5,-2.24 -5,-5 0,-2.76 2.24,-5 5,-5 2.76,0 5,2.24 5,5 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(0.8,0,0,0.8,5.92,0.8)" />
+    </marker>
+  </defs>
+  <metadata
+     id="metadata3740">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1"
+     transform="translate(59,-90.125)">
+    <rect
+       style="opacity:1;vector-effect:none;fill:#bac5aa;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect849"
+       width="274"
+       height="153"
+       x="377"
+       y="286" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:21.33333397px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="464"
+       y="368.38541"
+       id="text853"><tspan
+         sodipodi:role="line"
+         id="tspan851"
+         x="464"
+         y="368.38541">CNI-plugin</tspan></text>
+    <path
+       style="opacity:1;vector-effect:none;fill:#dee48b;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 307.5,316.53711 V 336.5 H 236 v 52 h 71.5 v 19.96289 L 353.46289,362.5 Z"
+       id="rect855"
+       inkscape:connector-curvature="0" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#rect855"
+       id="use861"
+       transform="translate(438)"
+       width="100%"
+       height="100%" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="261"
+       y="369.45898"
+       id="text867"><tspan
+         sodipodi:role="line"
+         id="tspan865"
+         x="261"
+         y="369.45898">stdin</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="699"
+       y="369.45898"
+       id="text871"><tspan
+         sodipodi:role="line"
+         id="tspan869"
+         x="699"
+         y="369.45898">stdout</tspan></text>
+    <g
+       id="g880"
+       transform="rotate(90,381.46928,292.03073)">
+      <path
+         style="opacity:1;vector-effect:none;fill:#dee48b;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="M 307.5,113.53711 V 133.5 H 236 v 52 h 71.5 v 19.96289 L 353.46289,159.5 Z"
+         id="path863"
+         inkscape:connector-curvature="0" />
+      <text
+         id="text875"
+         y="164.59505"
+         x="263"
+         style="font-style:normal;font-weight:normal;font-size:18.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         xml:space="preserve"><tspan
+           y="164.59505"
+           x="263"
+           id="tspan873"
+           sodipodi:role="line">env</tspan></text>
+    </g>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 514,455 v 63"
+       id="path882"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="450"
+       y="547"
+       id="text1180"><tspan
+         sodipodi:role="line"
+         id="tspan1178"
+         x="450"
+         y="547">Do something</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="-29"
+       y="225"
+       id="text1203"><tspan
+         sodipodi:role="line"
+         id="tspan1201"
+         x="-29"
+         y="225">{</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="245"
+         id="tspan1205">  &quot;cniVersion&quot;: &quot;0.4.0&quot;,</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="265"
+         id="tspan1207">  &quot;name&quot;: &quot;cni-x&quot;,</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="285"
+         id="tspan1209">  &quot;ipam&quot;: {</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="305"
+         id="tspan1211">    &quot;type&quot;: &quot;host-local&quot;,</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="325"
+         id="tspan1213">    &quot;ranges&quot;: [</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="345"
+         id="tspan1215">      [</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="365"
+         id="tspan1217">        {</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="385"
+         id="tspan1219">          &quot;subnet&quot;: &quot;1000::/120&quot;</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="405"
+         id="tspan1221">        }</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="425"
+         id="tspan1223">      ]</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="445"
+         id="tspan1225">    ],</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="465"
+         id="tspan1227">    &quot;dataDir&quot;: &quot;/ipam-state&quot;</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="485"
+         id="tspan1229">  }</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="505"
+         id="tspan1231">}</tspan><tspan
+         sodipodi:role="line"
+         x="-29"
+         y="525"
+         id="tspan1233" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="420"
+       y="112"
+       id="text1237"><tspan
+         sodipodi:role="line"
+         id="tspan1235"
+         x="420"
+         y="112">CNI_COMMAND=ADD ...</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="113"
+       y="67"
+       id="text1241"><tspan
+         sodipodi:role="line"
+         id="tspan1239"
+         x="113"
+         y="83.515625"></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="804.29138"
+       y="268.04398"
+       id="text1245"><tspan
+         sodipodi:role="line"
+         id="tspan1243"
+         x="804.29138"
+         y="268.04398">{</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="288.04398"
+         id="tspan1247">  &quot;cniVersion&quot;: &quot;0.4.0&quot;,</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="308.04398"
+         id="tspan1249">  &quot;ips&quot;: [</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="328.04398"
+         id="tspan1251">    {</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="348.04398"
+         id="tspan1253">      &quot;version&quot;: &quot;6&quot;,</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="368.04398"
+         id="tspan1255">      &quot;address&quot;: &quot;1000::6/120&quot;,</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="388.04398"
+         id="tspan1257">      &quot;gateway&quot;: &quot;1000::1&quot;</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="408.04398"
+         id="tspan1259">    }</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="428.04398"
+         id="tspan1261">  ],</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="448.04398"
+         id="tspan1263">  &quot;dns&quot;: {}</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="468.04398"
+         id="tspan1265">}</tspan><tspan
+         sodipodi:role="line"
+         x="804.29138"
+         y="488.04398"
+         id="tspan1267" /></text>
+  </g>
+</svg>
