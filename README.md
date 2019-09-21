@@ -2,14 +2,99 @@
 
 A basic [Kubernetes](https://kubernetes.io/) CNI-plugin.
 
-This is the basic CNI-plugin used in [xcluster](https://github.com/Nordix/xcluster). It uses;
+This is the basic CNI-plugin used in
+[xcluster](https://github.com/Nordix/xcluster). The `xcluster-cni` is
+a very simple CNI-plugin which makes it suitable for experiments and
+as an introduction to container networking in Kubernetes.
+
+`xcluster-cni` is a meta CNI-plugin and uses;
 
 * [bridge plugin](https://github.com/containernetworking/plugins/tree/master/plugins/main/bridge)
 
 * [host-local ipam](https://github.com/containernetworking/plugins/tree/master/plugins/ipam/host-local)
 
-The `xcluster-cni` is a very simple CNI-plugin which makes it suitable for
-experiments and as an introduction to container networking in Kubernetes.
+
+For K8s there are two problems;
+
+* While the `bridge` CNI-plugin sets up POD-to-POD communication
+  within a node, thre is no connectivity between nodes.
+
+* The `host-local` IPAM-plugin must use different address ranges on
+  different K8s nodes.
+
+
+Fortunately K8s provides all necessary information on a silver
+platter. CIDR ranges used by PODs are specified to the
+`kube-controller-manager`. Example;
+
+```
+kube-controller-manager --cluster-cidr=11.0.0.0/16,1100::/16 \
+  --allocate-node-cidrs=true --node-cidr-mask-size=24 ...
+```
+
+The example shows a limitation that exist for dual-stack in k8s
+1.16.0; there is no way of specifying `node-cidr-mask-size` for ipv4
+and ipv6 individually. So the same mask must be used. This will be
+fixed in k8s dual-stack phase 3. But beside beeing a bit odd, it works.
+
+With the setting above K8s will allocate address ranges (CIDR) for all
+nodes;
+
+```
+# kubectl get nodes -o json | jq '.items[]|.metadata.name,.spec'
+"vm-001"
+{
+  "podCIDR": "11.0.4.0/24",
+  "podCIDRs": [
+    "11.0.4.0/24",
+    "1100:400::/24"
+  ]
+}
+"vm-002"
+{
+  "podCIDR": "11.0.1.0/24",
+  "podCIDRs": [
+    "11.0.1.0/24",
+    "1100:100::/24"
+  ]
+}
+"vm-003"
+{
+  "podCIDR": "11.0.3.0/24",
+  "podCIDRs": [
+    "11.0.3.0/24",
+    "1100:300::/24"
+  ]
+}
+"vm-004"
+{
+  "podCIDR": "11.0.0.0/24",
+  "podCIDRs": [
+    "11.0.0.0/24",
+    "1100::/24"
+  ]
+}
+```
+
+`podCIDRs` contains assigned address ranges for ipv4 and ipv6 for each
+node (`podCIDR` is for backward compatibility). Now we just have to
+make sure that the `host-local` IPAM-plugin is configured with these
+ranges on each node.
+
+For inter-node connectivity we know the POD address ranges and the
+nodes they are assigned to. It is just a matter of setting up ipv4 and
+ipv6 routes. Example;
+
+```
+vm-003 # ip -6 ro
+1000::1:c0a8:100/120 dev eth1 proto kernel metric 256 pref medium
+1100::/24 via 1000::1:c0a8:104 dev eth1 metric 1024 pref medium
+1100:100::/24 via 1000::1:c0a8:102 dev eth1 metric 1024 pref medium
+1100:400::/24 via 1000::1:c0a8:101 dev eth1 metric 1024 pref medium
+```
+
+The principles are simple. It is `xcluster-cni's job to make this
+automatic.
 
 
 ## Container Network Interface (CNI)
@@ -45,6 +130,8 @@ cd $CNIXDIR
 tar xf $HOME/Downloads/cni-plugins-linux-amd64-v0.8.2.tgz
 ```
 
+#### host-local
+
 Use the `host-local` IPAM plugin to get some addresses;
 
 ```
@@ -71,6 +158,9 @@ EOF
 Try this a couple of times and examine the `container-ipam-state`
 directory. You can experiment with different commands and configurations.
 
+
+#### bridge
+
 To try a CNI-plugin (not an IPAM) we need a network namespace (netns).
 Note that a "netns" is a "partial container", your fs, pid (etc)
 namespaces are not altered.
@@ -91,6 +181,7 @@ Use the `bridge` CNI-plugin to create an interface in the netns
 
 ```
 # CNIXDIR=/home/<your-user>/tmp/cni-experiments
+# cd $CNIXDIR
 # CNI_CONTAINERID=$(uuid) CNI_NETNS=/var/run/netns/cni-x CNI_IFNAME=eth0 \
  CNI_PATH=$CNIXDIR CNI_COMMAND=ADD ./bridge <<EOF | jq
 {
@@ -128,6 +219,10 @@ PING 1000::7(1000::7) 56 data bytes
 --- 1000::7 ping statistics ---
 1 packets transmitted, 1 received, 0% packet loss, time 0ms
 rtt min/avg/max/mdev = 0.185/0.185/0.185/0.000 ms
+
+# ip netns exec cni-x bash
+## (check things...)
+# exit
 ```
 
 
