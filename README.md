@@ -266,3 +266,21 @@ as a filter to `host-local` and inserts ranges taken from K8s;
 
 <img src="node-local-plugin.svg" alt="ipam node-local figure" width="100%" />
 
+Ipam `node-local` is a (small) shell script that uses `kubectl` to
+read the K8s node object and `jq` to insert the address ranges in the
+json code. The `node-local` does not care about the CNI parameters in
+the environment.
+
+
+## POD address routing
+
+The [xcluster-cni-router.sh](xcluster-cni-router.sh) script
+periodically polls the K8s node objects and setup routes.
+
+This is a WIP.
+
+
+## Xcluster-cni image
+
+NYI
+
