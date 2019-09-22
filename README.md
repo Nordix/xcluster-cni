@@ -258,3 +258,11 @@ EOF
 # ip link del cbr0
 ```
 
+
+## IPAM node-local
+
+The ipam [node-local](https://github.com/Nordix/ipam-node-local) act
+as a filter to `host-local` and inserts ranges taken from K8s;
+
+<img src="node-local-plugin.svg" alt="ipam node-local figure" width="100%" />
+
