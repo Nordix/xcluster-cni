@@ -282,5 +282,13 @@ This is a WIP.
 
 ## Xcluster-cni image
 
-NYI
+https://github.com/kubernetes/client-go/issues/584
 
+```
+ver=master
+GO111MODULE=on CGO_ENABLED=0 GOOS=linux \
+ go build -ldflags "-extldflags '-static' -X main.version=$ver" \
+ -o image/bin/list-nodes ./cmd/...
+strip image/bin/list-nodes
+docker build -t registry.nordix.org/cloud-native/xcluster-cni:$ver .
+```

@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: xcluster-cni
+spec:
+  selector:
+    matchLabels:
+      app: xcluster-cni
+  template:
+    metadata:
+      labels:
+        app: xcluster-cni
+    spec:
+      hostNetwork: true
+      containers:
+      - name: mconnect
+        image: registry.nordix.org/cloud-native/xcluster-cni:master
