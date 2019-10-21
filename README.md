@@ -274,16 +274,35 @@ the environment.
 
 ## POD address routing
 
-The [xcluster-cni-router.sh](xcluster-cni-router.sh) script
+The [xcluster-cni-router.sh](image/bin/xcluster-cni-router.sh) script
 periodically polls the K8s node objects and setup routes.
-
-This is a WIP.
 
 
 ## Xcluster-cni image
 
-https://github.com/kubernetes/client-go/issues/584
+This is a WIP.
 
+The `xcluster-cni` is a meta CNI-plugin and requires that the "bridge"
+and "host-local" must be available on all nodes. The "node-local" IPAM
+uses `kubectl` to get the pod segments and uses "jq" to analyze json
+output.
+
+Dependencies on nodes;
+
+ * /opt/cni/bin/bridge
+
+ * /opt/cni/bin/host-local
+
+ * [/opt/cni/bin/node-local](https://github.com/Nordix/ipam-node-local)
+
+ * kubectl
+
+ * jq
+
+(`node-local` may be included in the image in the future)
+
+
+Build;
 ```
 ver=master
 GO111MODULE=on CGO_ENABLED=0 GOOS=linux \

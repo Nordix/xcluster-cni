@@ -1,4 +1,4 @@
 FROM alpine:3.10
 RUN apk add jq
 COPY --chown=0:0 image/ /
-CMD ["/bin/xcluster-cni-router.sh", "monitor", "--dry-run"]
+CMD ["/bin/xcluster-cni-router.sh", "monitor"]
