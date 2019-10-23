@@ -271,16 +271,13 @@ ranges taken from K8s;
 
 <img src="node-local-plugin.svg" alt="ipam node-local figure" width="100%" />
 
-Ipam `node-local` is a (small) shell script that uses `kubectl` to
-read the K8s node object and `jq` to insert the address ranges in the
-json code. The `node-local` does not care about the CNI parameters in
-the environment.
+Ipam `node-local` is a (small) shell script that uses `jq` to insert
+the address ranges in the json code. The `node-local` does not care
+about the CNI parameters in the environment.
 
 #### Dependency
 
-These programs must be executable on all nodes;
-
- * kubectl
+This programs must be executable on all nodes;
 
  * jq
 

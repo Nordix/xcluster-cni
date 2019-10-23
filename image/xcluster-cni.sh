@@ -34,7 +34,19 @@ dbg() {
 ##    Print environment.
 ##
 cmd_env() {
-	test "$cmd" = "env" && set | grep -E '^(__.*|ARCHIVE)='
+	test -n "$K8S_NODE" || K8S_NODE=$(hostname)
+	test "$cmd" = "env" && set | grep -E '^(__.*|K8S_NODE)='
+}
+
+cmd_pod_cidrs() {
+	cmd_env
+	mkdir -p $tmp
+	list-nodes | jq -r "select(.metadata.name == \"$K8S_NODE\")" > $tmp/out
+	if test "$(jq .spec.podCIDRs < $tmp/out)" != "null"; then
+		jq -r '.spec.podCIDRs[]' < $tmp/out
+	else
+		jq -r '.spec.podCIDR' < $tmp/out
+	fi
 }
 
 ##	start
@@ -44,7 +56,10 @@ cmd_start() {
 	cmd_env
 	ip link add name cbr0 type bridge
 	ip link set dev cbr0 up
-	test -d /cni/bin && cp -r /opt/cni/bin/* /cni/bin
+	if test -d /cni/bin; then
+		cp -r /opt/cni/bin/* /cni/bin
+		cmd_pod_cidrs >  /cni/bin/podCIDR
+	fi
 	test -d /cni/net.d && cp -r /etc/cni/net.d/* /cni/net.d
 	exec /bin/xcluster-cni-router.sh monitor
 }
