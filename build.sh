@@ -37,7 +37,6 @@ cmd_env() {
 	test -n "$__image" || __image=registry.nordix.org/cloud-native/xcluster-cni
 	test -n "$__version" || __version=master
 	test -n "$__plugin_tar" || __plugin_tar=$HOME/Downloads/cni-plugins-linux-amd64-v0.8.2.tgz
-	test -n "$__node_local" || __node_local=$GOPATH/src/github.com/Nordix/ipam-node-local/node-local
 	test "$cmd" = "env" && set | grep -E '^(__.*)='
 }
 
@@ -47,11 +46,8 @@ cmd_env() {
 cmd_image() {
 	cmd_env
 	test -r "$__plugin_tar" || die "Not readable [$__plugin_tar]"
-	test -r "$__node_local" || \
-		die "Not readable [$__node_local]. Do 'go get -d github.com/Nordix/ipam-node-local/node-local'"
 	mkdir -p $dir/image/opt/cni/bin
 	tar -C $dir/image/opt/cni/bin -xf "$__plugin_tar" ./host-local ./bridge
-	cp "$__node_local" $dir/image/opt/cni/bin
 	GO111MODULE=on CGO_ENABLED=0 GOOS=linux \
 		go build -ldflags "-extldflags '-static' -X main.version=$__version" \
 		-o image/bin/list-nodes ./cmd/...

@@ -266,8 +266,8 @@ EOF
 
 ## IPAM node-local
 
-The ipam [node-local](https://github.com/Nordix/ipam-node-local) act
-as a filter to `host-local` and inserts ranges taken from K8s;
+The ipam `node-local` act as a filter to `host-local` and inserts
+ranges taken from K8s;
 
 <img src="node-local-plugin.svg" alt="ipam node-local figure" width="100%" />
 
@@ -276,8 +276,7 @@ read the K8s node object and `jq` to insert the address ranges in the
 json code. The `node-local` does not care about the CNI parameters in
 the environment.
 
-The "node-local" IPAM uses `kubectl` to get the pod segments and uses
-"jq" to analyze json output.
+#### Dependency
 
 These programs must be executable on all nodes;
 
