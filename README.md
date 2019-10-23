@@ -11,7 +11,7 @@ as an introduction to container networking in Kubernetes.
 
 Install;
 ```
-kubectl apply -f xcluster-cni.yaml
+kubectl apply -f https://raw.githubusercontent.com/Nordix/xcluster-cni/master/xcluster-cni.yaml
 ```
 
 `xcluster-cni` is a meta CNI-plugin and uses;
