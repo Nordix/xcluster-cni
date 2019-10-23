@@ -2,12 +2,17 @@
 
 A basic [Kubernetes](https://kubernetes.io/) CNI-plugin.
 
-This is the basic CNI-plugin used in
+This is a basic CNI-plugin used in
 [xcluster](https://github.com/Nordix/xcluster). The `xcluster-cni` is
 a very simple CNI-plugin which makes it suitable for experiments and
 as an introduction to container networking in Kubernetes.
 
 **NOTE:** `xcluster-cni` is not intended for K8s clusters in production!
+
+Install;
+```
+kubectl apply -f xcluster-cni.yaml
+```
 
 `xcluster-cni` is a meta CNI-plugin and uses;
 
@@ -271,6 +276,15 @@ read the K8s node object and `jq` to insert the address ranges in the
 json code. The `node-local` does not care about the CNI parameters in
 the environment.
 
+The "node-local" IPAM uses `kubectl` to get the pod segments and uses
+"jq" to analyze json output.
+
+These programs must be executable on all nodes;
+
+ * kubectl
+
+ * jq
+
 
 ## POD address routing
 
@@ -280,34 +294,10 @@ periodically polls the K8s node objects and setup routes.
 
 ## Xcluster-cni image
 
-This is a WIP.
+The image is built with "docker build" so `docker` must be installed.
 
-The `xcluster-cni` is a meta CNI-plugin and requires that the "bridge"
-and "host-local" must be available on all nodes. The "node-local" IPAM
-uses `kubectl` to get the pod segments and uses "jq" to analyze json
-output.
-
-Dependencies on nodes;
-
- * /opt/cni/bin/bridge
-
- * /opt/cni/bin/host-local
-
- * [/opt/cni/bin/node-local](https://github.com/Nordix/ipam-node-local)
-
- * kubectl
-
- * jq
-
-(`node-local` may be included in the image in the future)
-
-
-Build;
 ```
-ver=master
-GO111MODULE=on CGO_ENABLED=0 GOOS=linux \
- go build -ldflags "-extldflags '-static' -X main.version=$ver" \
- -o image/bin/list-nodes ./cmd/...
-strip image/bin/list-nodes
-docker build -t registry.nordix.org/cloud-native/xcluster-cni:$ver .
+./build.sh         # Help printout
+./build.sh image   # Build the image with default settings
+./build.sh env     # View the defaults
 ```

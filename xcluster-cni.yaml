@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: xcluster-cni
+  namespace: kube-system
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,20 +29,24 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: xcluster-cni
-  namespace: default                         
+  namespace: kube-system                      
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: xcluster-cni
+  namespace: kube-system
 spec:
   selector:
     matchLabels:
       app: xcluster-cni
   template:
     metadata:
+      namespace: kube-system
       labels:
         app: xcluster-cni
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
@@ -56,8 +61,21 @@ spec:
       serviceAccount: xcluster-cni
       hostNetwork: true
       containers:
-      - name: mconnect
+      - name: xcluster-cni
         image: registry.nordix.org/cloud-native/xcluster-cni:master
         securityContext:
-          capabilities:
-            add: ["NET_ADMIN"]
+          privileged: true
+        volumeMounts:
+         - mountPath: /cni/bin
+           name: cni-bin-dir
+           readOnly: false
+         - mountPath: /cni/net.d
+           name: cni-net-dir
+           readOnly: false
+      volumes:
+        - name: cni-bin-dir
+          hostPath:
+            path: /opt/cni/bin
+        - name: cni-net-dir
+          hostPath:
+            path: /etc/cni/net.d

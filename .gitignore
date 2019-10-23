@@ -1,0 +1,4 @@
+image/**
+!image/etc/cni/net.d/10-xcluster-cni.conf
+!image/bin/xcluster-cni-router.sh
+!image/xcluster-cni.sh
