@@ -14,6 +14,55 @@ Install;
 kubectl apply -f https://raw.githubusercontent.com/Nordix/xcluster-cni/master/xcluster-cni.yaml
 ```
 
+## Node ipv6 addresses in dual-host cluster
+
+
+**NOTE**: `xcluster-cni` does not handle this correctly at the
+moment. It uses a `xcluster` unique work-around.
+
+
+The ipv4 address for the nodes can be read from the K8s "node" object;
+
+```
+# kubectl get node vm-002 -o json | jq .status.addresses
+[
+  {
+    "address": "192.168.1.2",
+    "type": "InternalIP"
+  },
+  {
+    "address": "vm-002",
+    "type": "Hostname"
+  }
+]
+```
+
+But how to get the ipv6 address to a node is an open question. Perhaps
+a new item in the array, e.g with type "InternalIP6", will appear in
+the future but unil then we must find other ways;
+
+* Provide a map node-name -> ipv6-address
+
+* Define a ipv6-prefix so nodes are assigned addresses with the prefix
+  and the node ipv4 address appended. Example; prefix=1000:1::/96,
+  ipv6-address=1000:1::192.168.1.2. Note that the ipv6 address will be
+  GUA if the prefix is global.
+
+* Take the address from a POD with "hostNetwork: true" on the node. In
+  this case the CRI-plugin is responsible for setting the addresses
+  which is uncertain. `cri-o` gets it right with correct
+  configuration, but other CRI-plugins may not.
+
+* Use a link-local ipv6 address to the node. This requires the MAC
+  address for the node which can be dug up from the ARP cache. This is
+  a hackish solution, but should work in most cases.
+
+
+
+
+
+## Description
+
 `xcluster-cni` is a meta CNI-plugin and uses;
 
 * [bridge plugin](https://github.com/containernetworking/plugins/tree/master/plugins/main/bridge)
