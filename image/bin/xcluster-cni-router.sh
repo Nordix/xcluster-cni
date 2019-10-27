@@ -40,6 +40,7 @@ dbg() {
 ##
 cmd_env() {
 	test -n "$__info_file" || __info_file=/tmp/node-info
+	test -n "$K8S_NODE" || K8S_NODE=$(hostname)
 	test "$cmd" = "env" && set | grep -E '^(__.*)='
 }
 
@@ -108,7 +109,7 @@ cmd_update_routes() {
 	fi
 
 	local n i cidr a h
-	h=$(hostname)
+	h=$K8S_NODE
 	for n in $(cat $__info_file | jq -r '.[].name'); do
 		test "$n" = "$h" && continue
 		i=$(cat $__info_file | jq ".[]|select(.name == \"$n\")")

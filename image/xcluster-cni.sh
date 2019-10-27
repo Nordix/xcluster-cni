@@ -53,6 +53,7 @@ cmd_pod_cidrs() {
 ##	  Start xcluster-cni. This is the container entry-point.
 ##
 cmd_start() {
+	echo "K8S_NODE=[$K8S_NODE]"
 	cmd_env
 	ip link add name cbr0 type bridge
 	ip link set dev cbr0 up

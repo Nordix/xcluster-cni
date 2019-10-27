@@ -63,6 +63,11 @@ spec:
       containers:
       - name: xcluster-cni
         image: registry.nordix.org/cloud-native/xcluster-cni:master
+        env:
+          - name: K8S_NODE
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
         securityContext:
           privileged: true
         volumeMounts:
