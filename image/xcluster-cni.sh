@@ -38,6 +38,7 @@ cmd_env() {
 	test "$cmd" = "env" && set | grep -E '^(__.*|K8S_NODE)='
 }
 
+# Print the own podCIDR's
 cmd_pod_cidrs() {
 	cmd_env
 	mkdir -p $tmp

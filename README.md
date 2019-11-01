@@ -14,14 +14,10 @@ Install;
 kubectl apply -f https://raw.githubusercontent.com/Nordix/xcluster-cni/master/xcluster-cni.yaml
 ```
 
-## Node ipv6 addresses in dual-host cluster
+### Node ipv6 addresses in dual-host cluster
 
 
-**NOTE**: `xcluster-cni` does not handle this correctly at the
-moment. It uses a `xcluster` unique work-around.
-
-
-The ipv4 address for the nodes can be read from the K8s "node" object;
+The addresses for the nodes can be read from the K8s "node" object;
 
 ```
 # kubectl get node vm-002 -o json | jq .status.addresses
@@ -37,11 +33,12 @@ The ipv4 address for the nodes can be read from the K8s "node" object;
 ]
 ```
 
-But how to get the ipv6 address to a node is an open question. Perhaps
-a new item in the array, e.g with type "InternalIP6", will appear in
-the future but unil then we must find other ways;
+A cloud provider may insert multiple `InternalIP` entries but
+`kubelet` does not (yet) do that. If only a ipv4 address is found we
+must find other options, for example;
 
-* Provide a map node-name -> ipv6-address
+
+* Provide a (config-)map node-name -> ipv6-address
 
 * Define a ipv6-prefix so nodes are assigned addresses with the prefix
   and the node ipv4 address appended. Example; prefix=1000:1::/96,
@@ -55,10 +52,13 @@ the future but unil then we must find other ways;
 
 * Use a link-local ipv6 address to the node. This requires the MAC
   address for the node which can be dug up from the ARP cache. This is
-  a hackish solution, but should work in most cases.
+  a hackish solution, but should work in most cases and is used as a
+  last resort.
 
 
-
+`xcluster-cni` uses an ipv6 prefix if defined in the `IPV6_PREFIX`
+environment variable or uses link-local ipv6 addresses if no prefix is
+specified.
 
 
 ## Description
