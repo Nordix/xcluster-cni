@@ -40,7 +40,7 @@ cmd_env() {
 	test "$cmd" = "env" && set | grep -E '^(__.*)='
 }
 
-##  image [--image=name] [--version=master] [--plugin-cni-plugins.tgz]
+##  image [--image=name] [--version=master] [--plugin-tar=file]
 ##    Build the "xcluster-cni" image.
 ##
 cmd_image() {

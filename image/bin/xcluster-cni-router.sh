@@ -98,6 +98,21 @@ cmd_check_routes() {
 }
 cmd_monitor() {
 	test -n "$__interval" || __interval=5
+	if test "$TUNNEL_MODE" = "sit"; then
+		# NOTE; Both sit0 and tunl0 must be up!
+		# https://bugzilla.kernel.org/show_bug.cgi?id=205501
+		if ! ip link set up dev sit0; then
+			log "Can not set sit0 up. TUNNEL_MODE=sid disabled!"
+			export TUNNEL_MODE=None
+		else
+			if ! ip link set up dev tunl0; then
+				log "Can not set tunl0 up. TUNNEL_MODE=sid disabled!"
+				export TUNNEL_MODE=None
+			else
+				log "Using sit tunnels"
+			fi
+		fi
+	fi
 	while true; do
 		cmd_check_routes
 		sleep $__interval
@@ -115,10 +130,14 @@ cmd_update_routes() {
 		return 0
 	fi
 
-	local n cidr h
-	h=$K8S_NODE
+	if test "$TUNNEL_MODE" = "sit"; then
+		cmd_update_routes_sit
+		return
+	fi
+
+	local n cidr
 	for n in $(cat $__info_file | jq -r '.[].name'); do
-		test "$n" = "$h" && continue
+		test "$n" = "$K8S_NODE" && continue
 		get_addresses $n
 		for cidr in $(echo $i | jq -r '.podCIDRs[]'); do
 			echo $cidr | grep -qi null | continue
@@ -139,6 +158,39 @@ cmd_update_routes() {
 	done
 }
 
+cmd_update_routes_sit() {
+	local n cidr a i
+	for n in $(cat $__info_file | jq -r '.[].name'); do
+		test "$n" = "$K8S_NODE" && continue
+		i=$(cat $__info_file | jq ".[]|select(.name == \"$n\")")
+
+		# We only use ipv4 encapsulation so only ipv4 node-addresses are needed
+		unset a4
+		for a in $(echo $i | jq -r .addresses[]); do
+			echo $a | grep -q : && continue
+			a4=$a
+			break
+		done
+		if test -z "$a4"; then
+			# This must be an ipv6-only cluster. We can't use "sit"
+			log "Disable sit tunnels in an ipv6-only cluster"
+			export TUNNEL_MODE=None
+			cmd_update_routes
+			return
+		fi
+
+		for cidr in $(echo $i | jq -r '.podCIDRs[]'); do
+			echo $cidr | grep -qi null | continue
+			if echo $cidr | grep -q : ; then
+				cmd_x ip -6 route add $cidr dev sit0 onlink via ::$a4
+			else
+				cmd_x ip route add $cidr dev sit0 onlink via $a4
+			fi
+		done
+	done
+}
+
+# Sets global variables; i a4 a6
 get_addresses() {
 	i=$(cat $__info_file | jq ".[]|select(.name == \"$1\")")
 	unset a4 a6
@@ -151,8 +203,8 @@ get_addresses() {
 		fi
 	done
 
-	test -n "$a6" && return
-	test -n "$a4" || return
+	test -n "$a6" && return 0
+	test -n "$a4" || return 0
 
 	# We have an ipv4 address, but no ipv6.
 
