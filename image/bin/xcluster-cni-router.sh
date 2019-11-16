@@ -119,7 +119,24 @@ cmd_monitor() {
 	done
 }
 
-
+##  remove_routes [--info-file=/tmp/node-info]
+##    Remove routes
+##
+cmd_remove_routes() {
+	cmd_env
+	local n cidr
+	for n in $(cat $__info_file | jq -r '.[].name'); do
+		test "$n" = "$K8S_NODE" && continue
+		for cidr in $(cat $__info_file | jq -r ".[]|select(.name == \"$n\")|.podCIDRs[]"); do
+			if echo $cidr | grep -q : ; then
+				cmd_x ip -6 ro del $cidr
+			else
+				cmd_x ip ro del $cidr
+			fi
+		done
+	done
+	
+}
 ##  update_routes [--info-file=/tmp/node-info]
 ##    Update routes to podCIDR's
 ##
@@ -182,9 +199,9 @@ cmd_update_routes_sit() {
 		for cidr in $(echo $i | jq -r '.podCIDRs[]'); do
 			echo $cidr | grep -qi null | continue
 			if echo $cidr | grep -q : ; then
-				cmd_x ip -6 route add $cidr dev sit0 onlink via ::$a4
+				cmd_x ip -6 route replace $cidr dev sit0 onlink via ::$a4
 			else
-				cmd_x ip route add $cidr dev sit0 onlink via $a4
+				cmd_x ip route replace $cidr dev sit0 onlink via $a4
 			fi
 		done
 	done

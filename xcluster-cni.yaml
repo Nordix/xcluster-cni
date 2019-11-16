@@ -63,6 +63,10 @@ spec:
       containers:
       - name: xcluster-cni
         image: registry.nordix.org/cloud-native/xcluster-cni:master
+        lifecycle:
+          preStop:
+           exec:
+             command: ["/xcluster-cni.sh", "stop"]
         env:
           - name: K8S_NODE
             valueFrom:

@@ -9,8 +9,11 @@ as an introduction to container networking in Kubernetes.
 
 **NOTE:** `xcluster-cni` is not intended for K8s clusters in production!
 
-Install;
+Install and check dependencies;
 ```
+which jq                   # Used by the mode-local ipam
+sudo ip link set up sit0   # xcluster-cni uses sit tunnels by default
+sudo ip link set up tunl0  # https://bugzilla.kernel.org/show_bug.cgi?id=205501
 kubectl apply -f https://raw.githubusercontent.com/Nordix/xcluster-cni/master/xcluster-cni.yaml
 ```
 

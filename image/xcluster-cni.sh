@@ -60,10 +60,30 @@ cmd_start() {
 	ip link set dev cbr0 up
 	if test -d /cni/bin; then
 		cp -r /opt/cni/bin/* /cni/bin
-		cmd_pod_cidrs >  /cni/bin/podCIDR
+		cmd_pod_cidrs > /cni/bin/podCIDR
+		while ! test -s /cni/bin/podCIDR; do
+			log "No podCIDRs found"
+			sleep 5
+			cmd_pod_cidrs > /cni/bin/podCIDR
+		done
+		log "Generated /cni/bin/podCIDR"
 	fi
 	test -d /cni/net.d && cp -r /etc/cni/net.d/* /cni/net.d
 	exec /bin/xcluster-cni-router.sh monitor
+}
+
+##  stop
+##    Stop xcluster-cni and cleanup. This is the container "preStop" hook.
+##
+cmd_stop() {
+	cmd_env
+	kill 1
+	ip link set dev cbr0 down
+	ip link del dev cbr0
+	test -d /cni/bin && rm -f /cni/bin/podCIDR /cni/bin/node-local
+	test -d /cni/net.d && rm -f /cni/net.d/10-xcluster-cni.conf
+	/bin/xcluster-cni-router.sh remove_routes
+	return 0
 }
 
 # Get the command
