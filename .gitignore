@@ -1,3 +1,4 @@
 image/bin/list-nodes
 image/opt/cni/bin/*
+image/build-date
 !image/opt/cni/bin/node-local
