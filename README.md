@@ -29,6 +29,37 @@ sudo ip link set up tunl0  # https://bugzilla.kernel.org/show_bug.cgi?id=205501
 kubectl apply -f https://raw.githubusercontent.com/Nordix/xcluster-cni/master/xcluster-cni.yaml
 ```
 
+#### Install K8s dual-stack with kubeadm
+
+From k8s `v1.17.0` you can install K8s dual-stack with kubeadm. Use a
+config file for `kubeadm`. Example;
+
+```
+kubeadm config images pull   # (check the k8s version)
+kubeadm init --config /etc/kubeadm-config.yaml
+```
+
+The config file must have parameters for dual-stack. Example (narrowed);
+
+```
+...
+featureGates:
+  IPv6DualStack: true
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+kubernetesVersion: v1.17.0-rc.1
+networking:
+  dnsDomain: cluster.local
+  podSubnet: "11.0.0.0/16,1100::/48"
+  serviceSubnet: "12.0.0.0/16,fd00:4000::/112"
+scheduler: {}
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+```
+
+
 ### Node ipv6 addresses in dual-host cluster
 
 
@@ -100,50 +131,45 @@ platter. CIDR ranges used by PODs are specified to the
 `kube-controller-manager`. Example;
 
 ```
-kube-controller-manager --cluster-cidr=11.0.0.0/16,1100::/16 \
+kube-controller-manager --cluster-cidr=11.0.0.0/16,1100::/48 \
   --allocate-node-cidrs=true --node-cidr-mask-size=24 ...
 ```
-
-The example shows a limitation that exist for dual-stack in k8s
-1.16.0; there is no way of specifying `node-cidr-mask-size` for ipv4
-and ipv6 individually. So the same mask must be used. This will be
-fixed in k8s dual-stack phase 3. But beside beeing a bit odd, it works.
 
 With the setting above K8s will allocate address ranges (CIDRs) for all
 nodes;
 
 ```
 # kubectl get nodes -o json | jq '.items[]|.metadata.name,.spec'
-"vm-001"
-{
-  "podCIDR": "11.0.4.0/24",
-  "podCIDRs": [
-    "11.0.4.0/24",
-    "1100:400::/24"
-  ]
-}
 "vm-002"
-{
-  "podCIDR": "11.0.1.0/24",
-  "podCIDRs": [
-    "11.0.1.0/24",
-    "1100:100::/24"
-  ]
-}
-"vm-003"
 {
   "podCIDR": "11.0.3.0/24",
   "podCIDRs": [
     "11.0.3.0/24",
-    "1100:300::/24"
+    "1100:0:0:3::/64"
+  ]
+}
+"vm-003"
+{
+  "podCIDR": "11.0.1.0/24",
+  "podCIDRs": [
+    "11.0.1.0/24",
+    "1100:0:0:1::/64"
   ]
 }
 "vm-004"
 {
+  "podCIDR": "11.0.2.0/24",
+  "podCIDRs": [
+    "11.0.2.0/24",
+    "1100:0:0:2::/64"
+  ]
+}
+"vm-005"
+{
   "podCIDR": "11.0.0.0/24",
   "podCIDRs": [
     "11.0.0.0/24",
-    "1100::/24"
+    "1100::/64"
   ]
 }
 ```
