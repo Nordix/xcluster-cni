@@ -7,7 +7,19 @@ This is a basic CNI-plugin used in
 a very simple CNI-plugin which makes it suitable for experiments and
 as an introduction to container networking in Kubernetes.
 
-**NOTE:** `xcluster-cni` is not intended for K8s clusters in production!
+Features;
+
+* You will understand it
+
+* Works with k8s ipv4-only, ipv6-only and dual-stack without any extra
+  configuration.
+
+* Handles MTU automatically
+
+* Good for experiments and education
+
+* NOT intended for K8s clusters in production
+
 
 Install and check dependencies;
 ```
