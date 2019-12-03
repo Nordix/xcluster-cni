@@ -40,6 +40,7 @@ A cloud provider may insert multiple `InternalIP` entries but
 `kubelet` does not (yet) do that. If only a ipv4 address is found we
 must find other options, for example;
 
+* Use a [sit tunnel](https://developers.redhat.com/blog/2019/05/17/an-introduction-to-linux-virtual-interfaces-tunnels/#sit)
 
 * Provide a (config-)map node-name -> ipv6-address
 
@@ -58,10 +59,10 @@ must find other options, for example;
   a hackish solution, but should work in most cases and is used as a
   last resort.
 
-
-`xcluster-cni` uses an ipv6 prefix if defined in the `IPV6_PREFIX`
-environment variable or uses link-local ipv6 addresses if no prefix is
-specified.
+`xcluster-cni` uses `sit0` by default. If you set TUNNEL_MODE=None in
+the manifest `xcluster-cni` uses an ipv6 prefix if defined in the
+`IPV6_PREFIX` environment variable or uses link-local ipv6 addresses
+if no prefix is specified.
 
 
 ## Description
