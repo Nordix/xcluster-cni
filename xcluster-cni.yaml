@@ -62,7 +62,7 @@ spec:
       hostNetwork: true
       containers:
       - name: xcluster-cni
-        image: registry.nordix.org/cloud-native/xcluster-cni:master
+        image: registry.nordix.org/cloud-native/xcluster-cni:latest
         lifecycle:
           preStop:
            exec:

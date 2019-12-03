@@ -35,12 +35,12 @@ dbg() {
 ##
 cmd_env() {
 	test -n "$__image" || __image=registry.nordix.org/cloud-native/xcluster-cni
-	test -n "$__version" || __version=master
+	test -n "$__version" || __version=latest
 	test -n "$__plugin_tar" || __plugin_tar=$HOME/Downloads/cni-plugins-linux-amd64-v0.8.2.tgz
 	test "$cmd" = "env" && set | grep -E '^(__.*)='
 }
 
-##  image [--image=name] [--version=master] [--plugin-tar=file]
+##  image [--image=name] [--version=latest] [--plugin-tar=file]
 ##    Build the "xcluster-cni" image.
 ##
 cmd_image() {
