@@ -59,6 +59,13 @@ kind: KubeProxyConfiguration
 mode: ipvs
 ```
 
+After the master node is installed and running install `xcluster-cni`
+as described above and "join" some workers;
+
+```
+kubectl apply -f https://raw.githubusercontent.com/Nordix/xcluster-cni/master/xcluster-cni.yaml
+```
+
 
 ### Node ipv6 addresses in dual-host cluster
 
