@@ -23,6 +23,17 @@ gw() {
 	echo $1 | sed -E 's,0?/.*,1,'
 }
 
+if ! echo $range | grep -q / ; then
+	cat <<EOF
+{
+  "cniVersion": "0.3.1",
+  "code": 11,
+  "msg": "No K8s CIDRs assigned yet"
+}
+EOF
+	exit 1
+fi
+
 for r in $range; do
 	gw=$(gw $r)
 	test -n "$subnets" && subnets="$subnets,"
