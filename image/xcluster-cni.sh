@@ -24,7 +24,7 @@ test -n "$1" || help
 echo "$1" | grep -qi "^help\|-h" && help
 
 log() {
-	echo "$prg: $*" >&2
+	echo "$(date +%T): $*" >&2
 }
 dbg() {
 	test -n "$__verbose" && echo "$prg: $*" >&2
@@ -84,25 +84,25 @@ update_mtu() {
 ##	  Start xcluster-cni. This is the container entry-point.
 ##
 cmd_start() {
-	echo "xcluster-cni; $(cat /build-date)"
+	test -r /build-date && echo "xcluster-cni; $(cat /build-date)"
 	echo "K8S_NODE=[$K8S_NODE]"
 	cmd_env
 	ip link add name cbr0 type bridge
 	ip link set dev cbr0 up
 	cmd_pod_cidrs > /opt/cni/bin/podCIDR
-	while ! test -s /opt/cni/bin/podCIDR; do
+	while ! grep -q / /opt/cni/bin/podCIDR; do
 		log "No podCIDRs found"
-		sleep 5
+		sleep 2
 		cmd_pod_cidrs > /opt/cni/bin/podCIDR
 	done
-	log "Generated /cni/bin/podCIDR"
+	log "Generated /opt/cni/bin/podCIDR"
 	if test -d /cni/bin; then
 		cp -r /opt/cni/bin/* /cni/bin
 	fi
+	update_mtu /etc/cni/net.d/10-xcluster-cni.conf
 	if test -d /cni/net.d; then
 		if ! test -r /cni/net.d/10-xcluster-cni.conf; then
 			cp /etc/cni/net.d/10-xcluster-cni.conf /cni/net.d
-			update_mtu /cni/net.d/10-xcluster-cni.conf
 		fi
 	fi
 	set_sit0_address
