@@ -127,7 +127,7 @@ if no prefix is specified.
 For K8s there are two problems;
 
 * While the `bridge` CNI-plugin sets up POD-to-POD communication
-  within a node, thre is no connectivity between nodes.
+  within a node, there is no connectivity between nodes.
 
 * The `host-local` IPAM-plugin must use different address ranges on
   different K8s nodes.
@@ -149,10 +149,10 @@ nodes;
 # kubectl get nodes -o json | jq '.items[]|.metadata.name,.spec'
 "vm-002"
 {
-  "podCIDR": "11.0.3.0/24",
+  "podCIDR": "11.0.2.0/24",
   "podCIDRs": [
-    "11.0.3.0/24",
-    "1100:0:0:3::/64"
+    "11.0.2.0/24",
+    "1100:0:0:2::/64"
   ]
 }
 "vm-003"
@@ -165,18 +165,18 @@ nodes;
 }
 "vm-004"
 {
-  "podCIDR": "11.0.2.0/24",
-  "podCIDRs": [
-    "11.0.2.0/24",
-    "1100:0:0:2::/64"
-  ]
-}
-"vm-005"
-{
   "podCIDR": "11.0.0.0/24",
   "podCIDRs": [
     "11.0.0.0/24",
     "1100::/64"
+  ]
+}
+"vm-005"
+{
+  "podCIDR": "11.0.3.0/24",
+  "podCIDRs": [
+    "11.0.3.0/24",
+    "1100:0:0:3::/64"
   ]
 }
 ```
@@ -192,10 +192,10 @@ routes. Example;
 
 ```
 vm-003 # ip -6 ro
-1000::1:c0a8:100/120 dev eth1 proto kernel metric 256 pref medium
-1100::/24 via 1000::1:c0a8:104 dev eth1 metric 1024 pref medium
-1100:100::/24 via 1000::1:c0a8:102 dev eth1 metric 1024 pref medium
-1100:400::/24 via 1000::1:c0a8:101 dev eth1 metric 1024 pref medium
+1100::/64 via ::192.168.1.4 dev sit0 metric 1024 onlink pref medium
+1100:0:0:1::/64 dev cbr0 proto kernel metric 256 pref medium
+1100:0:0:2::/64 via ::192.168.1.2 dev sit0 metric 1024 onlink pref medium
+1100:0:0:3::/64 via ::192.168.1.5 dev sit0 metric 1024 onlink pref medium
 ```
 
 This is enough. The principles are simple. It is `xcluster-cni`'s job
