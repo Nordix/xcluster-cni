@@ -18,7 +18,7 @@ Features;
 
 * Good for experiments and education
 
-* NOT intended for K8s clusters in production
+* Limited maintenance (just by me, but PRs are wellcome)
 
 
 Install and check dependencies;
@@ -47,7 +47,7 @@ featureGates:
   IPv6DualStack: true
 imageRepository: k8s.gcr.io
 kind: ClusterConfiguration
-kubernetesVersion: v1.17.0-rc.1
+kubernetesVersion: v1.17.2
 networking:
   dnsDomain: cluster.local
   podSubnet: "11.0.0.0/16,1100::/48"
