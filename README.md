@@ -18,7 +18,7 @@ Features;
 
 * Good for experiments and education
 
-* Limited maintenance (just by me, but PRs are wellcome)
+* Limited maintenance (just by me, but PRs are welcome)
 
 
 Install and check dependencies;
