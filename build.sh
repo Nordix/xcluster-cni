@@ -52,6 +52,7 @@ cmd_image() {
 		go build -ldflags "-extldflags '-static' -X main.version=$__version" \
 		-o image/bin/list-nodes ./cmd/...
 	strip image/bin/list-nodes
+	gcc -o image/bin/ipv4 -static ./src/ipv4.c
 	date > image/build-date
 	docker build -t $__image:$__version .
 }

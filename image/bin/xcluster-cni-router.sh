@@ -220,8 +220,13 @@ get_addresses() {
 		fi
 	done
 
-	test -n "$a6" && return 0
-	test -n "$a4" || return 0
+	test -n "$a6" -a -n "$a4" && return 0
+	if test -z "$a4"; then
+		# We have an ipv6 address, but no ipv4.
+		# We can only handle this case if $IPV6_PREFIX is used.
+		test -n "$IPV6_PREFIX" && a4=$(ipv4 $a6)
+		return 0
+	fi
 
 	# We have an ipv4 address, but no ipv6.
 

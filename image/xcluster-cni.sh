@@ -44,11 +44,44 @@ cmd_env() {
 cmd_pod_cidrs() {
 	cmd_env
 	list-nodes | jq "select(.metadata.name == \"$K8S_NODE\")" > $my_node_info
-	if test "$(jq .spec.podCIDRs < $my_node_info)" != "null"; then
-		jq -r '.spec.podCIDRs[]' < $my_node_info
-	else
-		jq -r '.spec.podCIDR' < $my_node_info
+	if test "$(jq .spec.podCIDRs < $my_node_info)" = "null"; then
+		# Pre v1.16 cluster
+		if test "$(jq .spec.podCIDR < $my_node_info)" != "null"; then
+			jq -r '.spec.podCIDR' < $my_node_info
+		fi
+		return 0
 	fi
+
+	if test "$(jq .spec.podCIDRs[1] < $my_node_info)" = "null"; then
+		# Single-stack cluster
+		jq -r '.spec.podCIDRs[]' < $my_node_info
+		return 0
+	fi
+
+	# For dual-stack the CNI-plugin must make sure that the first
+	# address is of the "main" family in the cluster ?!?!?!
+	if echo "$KUBERNETES_SERVICE_HOST" | grep -q : ; then
+		# Main family ipv6
+		if jq -r '.spec.podCIDRs[0]' < $my_node_info grep -q : ; then
+			# Ok, correct family
+			jq -r '.spec.podCIDRs[]' < $my_node_info
+		else
+			# Reverse the order
+			jq -r '.spec.podCIDRs[1]' < $my_node_info
+			jq -r '.spec.podCIDRs[0]' < $my_node_info
+		fi
+	else
+		# Main family ipv4
+		if jq -r '.spec.podCIDRs[0]' < $my_node_info grep -q : ; then
+			# Reverse the order
+			jq -r '.spec.podCIDRs[1]' < $my_node_info
+			jq -r '.spec.podCIDRs[0]' < $my_node_info
+		else
+			# Ok, correct family
+			jq -r '.spec.podCIDRs[]' < $my_node_info
+		fi
+	fi
+	return 0
 }
 
 # Print the interface that holds the passed address
