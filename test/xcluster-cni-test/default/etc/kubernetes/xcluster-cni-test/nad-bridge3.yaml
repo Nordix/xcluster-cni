@@ -1,0 +1,16 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: bridge3
+spec:
+  config: '{
+    "cniVersion": "0.4.0",
+    "type": "bridge",
+    "bridge": "br3",
+    "isGateway": true,
+    "ipam": {
+      "type": "kube-node",
+      "annotation": "cidr.example.com/eth2",
+      "dataDir": "/run/container-ipam-state/bridge3"
+    }
+  }'

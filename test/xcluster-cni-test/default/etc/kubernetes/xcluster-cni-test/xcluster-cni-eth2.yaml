@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: xcluster-cni-eth2
+spec:
+  selector:
+    matchLabels:
+      app: xcluster-cni-eth2
+  template:
+    metadata:
+      labels:
+        app: xcluster-cni-eth2
+    spec:
+      hostNetwork: true
+      containers:
+      - name: xcluster-cni
+        image: registry.nordix.org/cloud-native/xcluster-cni:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: GO_DAEMON
+            value: "yes"
+          - name: K8S_NODE
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          # mandatory INTERFACE=<interface for this network>
+          - name: INTERFACE
+            value: "eth2"
+        securityContext:
+          privileged: true

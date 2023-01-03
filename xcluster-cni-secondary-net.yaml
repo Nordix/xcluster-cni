@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: xcluster-cni-secondary-net
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: xcluster-cni-secondary-net
+  template:
+    metadata:
+      namespace: kube-system
+      labels:
+        app: xcluster-cni-secondary-net
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      hostNetwork: true
+      containers:
+      - name: xcluster-cni
+        image: registry.nordix.org/cloud-native/xcluster-cni:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: LOG_LEVEL
+            value: "debug"
+          - name: CIDR_ANNOTATION
+            value: "cidr.example.com/eth2"
+          - name: ADDRESS_ANNOTATION
+            value: "adr.example.com/eth2"
+          - name: PROTOCOL
+            value: "203"
+        securityContext:
+          privileged: true

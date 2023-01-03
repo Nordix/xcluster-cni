@@ -1,5 +1,1 @@
-image/bin/list-nodes
-image/bin/ipv4
-image/opt/cni/bin/*
-image/build-date
-!image/opt/cni/bin/node-local
+_output
