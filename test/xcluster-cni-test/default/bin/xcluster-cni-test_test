@@ -1,0 +1,202 @@
+#! /bin/sh
+##
+## xcluster-cni-test_test --
+##
+##   Test script for xcluster-cni-test executed in xcluster.
+##
+## Commands;
+##
+
+prg=$(basename $0)
+dir=$(dirname $0); dir=$(readlink -f $dir)
+me=$dir/$prg
+tmp=/tmp/${prg}_$$
+
+. /etc/profile
+test -n "$DOMAIN" || DOMAIN=xcluster
+test -n "$PREFIX" || PREFIX=1000::1
+yamld=/etc/kubernetes/xcluster-cni-test
+
+die() {
+	echo "ERROR: $*" >&2
+	rm -rf $tmp
+	exit 1
+}
+help() {
+	grep '^##' $0 | cut -c3-
+	rm -rf $tmp
+	exit 0
+}
+test -n "$1" || help
+echo "$1" | grep -qi "^help\|-h" && help
+
+log() {
+	echo "$prg: $*" >&2
+}
+dbg() {
+	test -n "$__verbose" && echo "$prg: $*" >&2
+}
+
+cmd_tcase_check_namespaces() {
+	test_namespaces
+}
+cmd_tcase_check_nodes() {
+	test_nodes
+}
+cmd_tcase_vip_routes() {
+	tcase "Set VIP routes (ECMP)"
+	vip_route
+}
+cmd_tcase_version() {
+	kubectl="kubectl -n kube-system"
+	local pod=$($kubectl get pod -l app=xcluster-cni -o name | head -1)
+	test -n "$pod" || return 0
+	local v
+	v=$($kubectl exec $pod -c xcluster-cni -- /bin/xcluster-cni -loglevel info version)
+	tlog "Binary version; $v"
+}
+##   tcase_start_alpine
+##     Start the Alpine deployment
+cmd_tcase_start_alpine() {
+	tcase "Start the Alpine deployment"
+	kubectl create -f $yamld/alpine.yaml || tdie
+	test_deployment alpine 60
+}
+##   tcase_collect_addresses
+##     Collect Alpine POD addresses
+cmd_tcase_collect_addresses() {
+	tcase "Collect Alpine POD addresses"
+	local out=/tmp/addresses
+	local pod
+	for pod in $(kubectl get pods -l app=alpine -o name); do
+		kubectl exec $pod -- ip addr show dev eth0 | grep global >> $out
+	done
+	tlog "Found addresses $(cat $out | wc -l)"
+}
+##   tcase_multus_crd
+##     Install multus CRDs
+cmd_tcase_multus_crd() {
+	tcase "Install multus CRDs"
+	kubectl create -f /etc/kubernetes/multus/multus-crd.yaml
+}
+##   tcase_ping
+##     Ping PODs from POD. Address must have been collected.
+cmd_tcase_ping() {
+	tcase "Ping PODs from POD"
+	local pod=$(kubectl get pods -l app=alpine -o name | head -1)
+	local out=/tmp/addresses-eth0
+	test -r $out || tdie "No addresses collected"
+	local adr
+	for adr in $(cat $out | tr -s ' ' / | cut -d/ -f3); do
+		kubectl exec $pod -- ping -c1 -W1 $adr || tdie "ping $adr in $pod"
+	done
+}
+##   tcase_start_eth2
+##     Start a xcluster-cni handler for eth2
+cmd_tcase_start_eth2() {
+	tcase "Start a xcluster-cni handler for eth2"
+	$kubectl create -f $yamld/xcluster-cni-eth2.yaml
+	test_daemonset xcluster-cni-eth2 60
+}
+##   tcase_annotate <interface>
+##     Annotate nodes with CIDR and Address annotations
+cmd_tcase_annotate() {
+	local iface=$1
+	tcase "Annotate nodes with CIDR and Address annotations [$iface]"
+	test -n "$iface" || tdie "No interface"
+	local net=$(echo $iface | tr -dc '0-9'); net=$((net + 1))
+	local n vm a a6
+	for n in $(seq 1 $__nvm); do
+		vm=$(printf "vm-%03d" $n)
+		a=192.168.$net.$n
+		kubectl annotate node $vm adr.example.com/$iface=$a,$PREFIX:$a
+		# IPv4 is limited to 8 nets, 64 nodes and 128 PODs on each node
+		# CIDR 172.20.0.0/16/19/25
+		a=$(xcluster-cni cidr 172.20.0.0/16/19 $net)
+		a=$(xcluster-cni cidr $a/25 $n)
+		a6=$PREFIX:$net:$n:0/112
+		kubectl annotate node $vm cidr.example.com/$iface=$a,$a6
+	done
+}
+##   tcase_daemon [interface]
+##     Start the xcluster-cni daemon in main netns
+cmd_tcase_daemon() {
+	local iface=$1
+	tcase "Start the xcluster-cni daemon in main netns [$iface]"
+	test -n "$iface" || tdie "No interface"
+	local net=$(echo $iface | tr -dc '0-9'); net=$((net + 1))
+	export PROTOCOL=$((net + 200))
+	export CIDR_ANNOTATION=cidr.example.com/$iface
+	export ADDRESS_ANNOTATION=adr.example.com/$iface
+	xcluster-cni -loglevel debug -logfile /var/log/xcluster-cni-$iface \
+		daemon 2>&1 > /dev/null &
+}
+##   tcase_alpine2
+##     Start an application with interfaces connected to net3 and net4
+##     (eth2 and eth3 on nodes).
+cmd_tcase_alpine2() {
+	tcase "Start an application with interfaces connected to net3 and net4"
+	kubectl create -f $yamld/nad-bridge3.yaml || tdie nad-bridge3
+	kubectl create -f $yamld/nad-bridge4.yaml || tdie nad-bridge4
+	kubectl create -f $yamld/alpine2.yaml || tdie alpine2
+	test_deployment alpine2 60
+}
+##   tcase_collect_addresses <interface>
+##     Collect global addresses from PODs
+cmd_tcase_collect_addresses() {
+	local iface=$1
+	tcase "Collect global addresses from PODs [$iface]"
+	test -n "$iface" || tdie "No interface"
+	local out=/tmp/addresses-$iface
+	test "$__app" || __app=alpine2
+	local pod
+	for pod in $(kubectl get pods -l app=$__app -o name); do
+		kubectl exec -c alpine $pod -- ip -j addr show dev $iface \
+			| jq -r '.[].addr_info[]|select(.scope == "global").local' >> $out
+	done
+	tlog "Collected addresses $(cat $out | wc -l)"
+}
+##   tcase_ping_collected_addresses <interface>
+##     Ping previously collected addresses
+cmd_tcase_ping_collected_addresses() {
+	local iface=$1
+	tcase "Ping previously collected addresses [$iface]"
+	test -n "$iface" || tdie "No interface"
+	local out=/tmp/addresses-$iface
+	test -r $out || tdie "No collected addresses"
+	local adr
+	for adr in $(cat $out); do
+		ping -c1 -W1 $adr || tdie $adr
+	done
+}
+
+
+. /usr/lib/xctest
+indent='  '
+
+##
+# Get the command
+cmd=$1
+shift
+grep -q "^cmd_$cmd()" $0 || die "Invalid command [$cmd]"
+
+while echo "$1" | grep -q '^--'; do
+	if echo $1 | grep -q =; then
+		o=$(echo "$1" | cut -d= -f1 | sed -e 's,-,_,g')
+		v=$(echo "$1" | cut -d= -f2-)
+		eval "$o=\"$v\""
+	else
+		o=$(echo "$1" | sed -e 's,-,_,g')
+		eval "$o=yes"
+	fi
+	shift
+done
+unset o v
+long_opts=`set | grep '^__' | cut -d= -f1`
+
+# Execute command
+trap "die Interrupted" INT TERM
+cmd_$cmd "$@"
+status=$?
+rm -rf $tmp
+exit $status

@@ -1,0 +1,51 @@
+#! /bin/sh
+. /etc/profile
+
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+
+die() {
+	echo "$@"
+	exit 1
+}
+
+hostname | grep -Eq 'vm-[0-9]+$' || die "Invalid hostname [$(hostname)]"
+i=$(hostname | cut -d- -f2 | sed -re 's,^0+,,')
+
+test "$TOPOLOGY" = "multilan-router" && . /usr/lib/network-topology.sh
+
+vm() {
+	if test "$CNI_INFO" = "xcluster-cni-test"; then
+		if test $i -eq 1; then
+			mkdir -p /etc/kubernetes/load
+			cp /etc/kubernetes/xcluster-cni.yaml /etc/kubernetes/load
+			return 0
+		fi
+	fi
+
+	test "$TOPOLOGY" = "multilan-router" || return 0
+	ifsetup eth2 3
+	ifsetup eth3 4
+	ifsetup eth4 5
+	return 0
+}
+
+router() {
+	test "$TOPOLOGY" = "multilan-router" || return 0
+	ifsetup eth3 3
+	ifsetup eth4 4
+	ifsetup eth5 5
+	return 0
+}
+
+tester() {
+	return 0
+}
+
+case $(hostname) in
+	vm-0*)
+		vm;;
+	vm-20*)
+		router;;
+	vm-22*)
+		tester;;
+esac

@@ -2,6 +2,7 @@
 ##
 ## xcluster-cni.sh --
 ##
+##   The container start point for github.com/Nordix/xcluster-cni
 ##
 ## Commands;
 ##
@@ -26,155 +27,25 @@ echo "$1" | grep -qi "^help\|-h" && help
 log() {
 	echo "$(date +%T): $*" >&2
 }
-dbg() {
-	test -n "$__verbose" && echo "$prg: $*" >&2
-}
 
-my_node_info=/tmp/my_node_info
-
-##  env
-##    Print environment.
-##
+##   env
+##     Print environment.
 cmd_env() {
-	test -n "$K8S_NODE" || K8S_NODE=$(hostname)
 	test "$cmd" = "env" && set | grep -E '^(__.*|K8S_NODE)='
 }
-
-# Print the own podCIDR's
-cmd_pod_cidrs() {
-	cmd_env
-	list-nodes | jq "select(.metadata.name == \"$K8S_NODE\")" > $my_node_info
-	if test "$(jq .spec.podCIDRs < $my_node_info)" = "null"; then
-		# Pre v1.16 cluster
-		if test "$(jq .spec.podCIDR < $my_node_info)" != "null"; then
-			jq -r '.spec.podCIDR' < $my_node_info
-		fi
-		return 0
-	fi
-
-	if test "$(jq .spec.podCIDRs[1] < $my_node_info)" = "null"; then
-		# Single-stack cluster
-		jq -r '.spec.podCIDRs[]' < $my_node_info
-		return 0
-	fi
-
-	# For dual-stack the CNI-plugin must make sure that the first
-	# address is of the "main" family in the cluster ?!?!?!
-	if echo "$KUBERNETES_SERVICE_HOST" | grep -q : ; then
-		# Main family ipv6
-		if jq -r '.spec.podCIDRs[0]' < $my_node_info grep -q : ; then
-			# Ok, correct family
-			jq -r '.spec.podCIDRs[]' < $my_node_info
-		else
-			# Reverse the order
-			jq -r '.spec.podCIDRs[1]' < $my_node_info
-			jq -r '.spec.podCIDRs[0]' < $my_node_info
-		fi
-	else
-		# Main family ipv4
-		if jq -r '.spec.podCIDRs[0]' < $my_node_info grep -q : ; then
-			# Reverse the order
-			jq -r '.spec.podCIDRs[1]' < $my_node_info
-			jq -r '.spec.podCIDRs[0]' < $my_node_info
-		else
-			# Ok, correct family
-			jq -r '.spec.podCIDRs[]' < $my_node_info
-		fi
-	fi
-	return 0
+##   install
+##     Install or upgrade the CNI-plugins
+cmd_install() {
+	test -d /cni/net.d && cp /etc/cni/net.d/10-xcluster-cni.conf /cni/net.d
+	test -d /cni/bin && cp /opt/cni/bin/* /cni/bin
 }
-
-# Print the interface that holds the passed address
-cmd_interface_for() {
-	test -n "$1" || die "No address"
-	local iface
-	for iface in $(ip link show | grep -E '^[0-9]+:' | cut -d: -f2 | cut -d@ -f1); do
-		if ip addr show dev $iface | grep -qF " $1/"; then
-			echo $iface
-			return
-		fi
-	done
-}
-
-# Try to find the MTU for the k8s insterface and compensate for the
-# tunnel-header if necessary. Then update the passed file.
-update_mtu() {
-	local adr=$(cat $my_node_info | jq -r '[.status.addresses[]|select(.type == "InternalIP")][0].address')
-	log "K8s node address; $adr"
-	test -z "$adr" -o "$adr" = "null" && return 0
-	local iface=$(cmd_interface_for $adr)
-	test -n "$iface" || return 0
-	local mtu=$(ip link show dev $iface | grep -oE 'mtu [0-9]+' | cut -d' ' -f2)
-	if test -n "$mtu" -a "$mtu" != "null"; then
-		test "$TUNNEL_MODE" = "sit" && mtu=$((mtu-20))
-		log "Using MTU=$mtu"
-		ip link set dev sit0 mtu $mtu
-		sed -i -e "s,1500,$mtu," $1
-	fi
-}
-
-##	start
-##	  Start xcluster-cni. This is the container entry-point.
-##
+##   start
+##	   Start xcluster-cni. This is the container entry-point.
 cmd_start() {
-	test -r /build-date && echo "xcluster-cni; $(cat /build-date)"
-	echo "K8S_NODE=[$K8S_NODE]"
-	cmd_env
-	ip link add name cbr0 type bridge
-	ip link set dev cbr0 up
-	cmd_pod_cidrs > /opt/cni/bin/podCIDR
-	while ! grep -q / /opt/cni/bin/podCIDR; do
-		log "No podCIDRs found"
-		sleep 2
-		cmd_pod_cidrs > /opt/cni/bin/podCIDR
-	done
-	log "Generated /opt/cni/bin/podCIDR"
-	if test -d /cni/bin; then
-		cp -r /opt/cni/bin/* /cni/bin
-	fi
-	update_mtu /etc/cni/net.d/10-xcluster-cni.conf
-	if test -d /cni/net.d; then
-		if ! test -r /cni/net.d/10-xcluster-cni.conf; then
-			cp /etc/cni/net.d/10-xcluster-cni.conf /cni/net.d
-		fi
-	fi
-	set_sit0_address
-	exec /bin/xcluster-cni-router.sh monitor
+	exec xcluster-cni daemon
 }
 
-# The sit0 ipv4 address must be set to the same as the k8s InternalIP
-# (but with /32). Otherwise the routing may become asymetric and not working.
-set_sit0_address() {
-	test "$TUNNEL_MODE" = "sit" || return
-	local a a4
-	for a in $(cat $my_node_info | jq -r '.status.addresses[]|select(.type == "InternalIP").address'); do
-		echo $a | grep -q : && continue
-		a4=$a
-		break
-	done
-	if test -n "$a4"; then
-		log "Set addr $a4/32 on dev sit0"
-		ip link set up dev sit0
-		ip addr add $a4/32 dev sit0
-	fi
-	return 0
-}
-
-
-##  stop
-##    Stop xcluster-cni and cleanup. This is the container "preStop" hook.
 ##
-cmd_stop() {
-	cmd_env
-	kill 1
-	ip link set dev cbr0 down
-	ip link del dev cbr0
-	test -d /cni/bin && rm -f /cni/bin/podCIDR /cni/bin/node-local
-	test -d /cni/net.d && rm /cni/net.d/10-xcluster-cni.conf
-	/bin/xcluster-cni-router.sh remove_routes
-	return 0
-}
-
 # Get the command
 cmd=$1
 shift

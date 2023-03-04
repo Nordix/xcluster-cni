@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpine2
+spec:
+  selector:
+    matchLabels:
+      app: alpine2
+  replicas: 8
+  template:
+    metadata:
+      labels:
+        app: alpine2
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[
+            { "name": "bridge3", "namespace": "default", "interface": "net3" },
+            { "name": "bridge4", "namespace": "default", "interface": "net4" }
+        ]'
+    spec:
+      containers:
+      - name: alpine
+        image: registry.nordix.org/cloud-native/meridio/base:1.0.0
+        imagePullPolicy: IfNotPresent
+        command: ["tail", "-f", "/dev/null"]
+        securityContext:
+          privileged: true
+      - name: mconnect
+        image: registry.nordix.org/cloud-native/mconnect:v2.2.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5001

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpine
+spec:
+  selector:
+    matchLabels:
+      app: alpine
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: alpine
+    spec:
+      containers:
+      - name: alpine
+        image: registry.nordix.org/cloud-native/meridio/base:1.0.0
+        imagePullPolicy: IfNotPresent
+        command: ["tail", "-f", "/dev/null"]
+        securityContext:
+          privileged: true
