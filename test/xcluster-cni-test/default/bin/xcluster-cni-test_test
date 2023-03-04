@@ -169,7 +169,7 @@ cmd_tcase_ping_collected_addresses() {
 		ping -c1 -W1 $adr || tdie $adr
 	done
 }
-##   tcase_install_secondary <interface>
+##   tcase_install_secondary [--trace] <interface>
 ##     Install secondary networking with daemonset
 cmd_tcase_install_secondary() {
 	tcase "Install secondary networking with daemonset [$@]"
@@ -181,6 +181,9 @@ cmd_tcase_install_secondary() {
 		proto=$((n + 210))
 		cat /etc/kubernetes/xcluster-cni-secondary-net.yaml | \
 			sed -e "s,eth2,$iface," -e "s,210,$proto," > $tmp/xcluster-cni.yaml
+		tlog "--trace=$__trace"
+		test "$__trace" = "yes" && \
+			sed -i -e 's,debug,trace,' $tmp/xcluster-cni.yaml
 		cat $tmp/xcluster-cni.yaml
 		kubectl create namespace $iface
 		kubectl -n $iface apply -f $tmp/xcluster-cni.yaml || tdie

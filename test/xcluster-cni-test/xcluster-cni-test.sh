@@ -157,7 +157,7 @@ test_install_secondary() {
 	test_start_multilan $@
 	otc 1 "annotate eth2"
 	otc 1 "annotate eth3"
-	otc 1 "install_secondary eth2 eth3"
+	otc 1 "install_secondary --trace=$__trace eth2 eth3"
 	otc 1 alpine2
 	otc 2 "collect_addresses net3"
 	otc 2 "collect_addresses net4"
@@ -170,7 +170,8 @@ test_install_secondary() {
 test_restart_pod() {
 	test_start_multilan $@
 	otc 1 "annotate eth2"
-	otc 1 "install_secondary eth2"
+	otc 1 "install_secondary --trace=$__trace eth2"
+	tcase "Delay 6s to allow sync..."; sleep 6
 	otc 2 restart_pod
 	xcluster_stop
 }
