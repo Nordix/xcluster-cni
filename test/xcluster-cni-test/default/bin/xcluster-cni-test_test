@@ -190,6 +190,23 @@ cmd_tcase_install_secondary() {
 		test_daemonset xcluster-cni-secondary-net 60
 	done
 }
+##   tcase_restart_pod
+##     Restart a router POD and check that no binaries are re-installed
+cmd_tcase_restart_pod() {
+	tcase "Restart a router POD and check that no binaries are re-installed"
+	local pod
+	kubectl="kubectl -n eth2"
+	pod=$(get_pod xcluster-cni-secondary-net vm-002)
+	$kubectl delete pod $pod || tdie
+	test_daemonset xcluster-cni-secondary-net 60
+	pod=$(get_pod xcluster-cni-secondary-net vm-002)
+	mkdir -p $tmp
+	$kubectl logs -c install $pod > $tmp/out
+	cat $tmp/out
+	test $(grep -F 'Same version. No upgrade' $tmp/out | wc -l) -eq 3 || \
+		tdie "Some binary updated. Check the log"
+	return 0
+}
 
 . /usr/lib/xctest
 indent='  '

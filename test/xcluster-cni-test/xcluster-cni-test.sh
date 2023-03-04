@@ -78,7 +78,7 @@ cmd_test() {
 		test_$t $@
 	else
 		unset __no_stop
-		for t in ping multilan install_secondary; do
+		for t in ping multilan install_secondary restart_pod; do
 			tlog "========== test $t"
 			$me test $t
 		done
@@ -150,7 +150,6 @@ test_multilan() {
 	xcluster_stop
 }
 ##   test install_secondary
-
 ##     Test installation for secondary network (only). Test re-start
 ##     of the routing POD and verify that no re-installation of
 ##     existing binaries are done
@@ -166,6 +165,16 @@ test_install_secondary() {
 	otc 2 "ping_collected_addresses net4"
 	xcluster_stop
 }
+##   test restart_pod
+##     Re-start a POD and verify that no binaries are re-installed
+test_restart_pod() {
+	test_start_multilan $@
+	otc 1 "annotate eth2"
+	otc 1 "install_secondary eth2"
+	otc 2 restart_pod
+	xcluster_stop
+}
+
 
 ##
 . $($XCLUSTER ovld test)/default/usr/lib/xctest

@@ -6,7 +6,7 @@
 K8s cluster. Key features;
 
 * **Multi networking** - `xcluster-cni` can create POD-POD connectivity on
-  secondary networks using. [Multus](
+  secondary networks. [Multus](
   https://github.com/k8snetworkplumbingwg/multus-cni) can be used to
   bring in extra interfaces to PODs
 
