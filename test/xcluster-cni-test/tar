@@ -25,19 +25,22 @@ mkdir -p $tmp
 cp -R $dir/default/* $tmp
 cp $topd/_output/xcluster-cni $tmp/bin
 
-f=$GOPATH/src/github.com/Nordix/ipam-node-annotation/_output/kube-node
-mkdir -p $tmp/opt/cni/bin
-if test -x $f; then
-	cp $f $tmp/opt/cni/bin
-else
-	findf kube-node.xz
-	xz -dc $f > $tmp/opt/cni/bin/kube-node
-	chmod a+x $tmp/opt/cni/bin/kube-node
+if test "$INSTALL_BINARIES" = "yes"; then
+	f=$GOPATH/src/github.com/Nordix/ipam-node-annotation/_output/kube-node
+	mkdir -p $tmp/opt/cni/bin
+	if test -x $f; then
+		cp $f $tmp/opt/cni/bin
+	else
+		findf kube-node.xz
+		xz -dc $f > $tmp/opt/cni/bin/kube-node
+		chmod a+x $tmp/opt/cni/bin/kube-node
+	fi
+	log "kube-node version $($tmp/opt/cni/bin/kube-node -version)"
 fi
-log "kube-node version $($tmp/opt/cni/bin/kube-node -version)"
 
 mkdir -p $tmp/etc/kubernetes
 sed -e 's,:latest,:local,' < $topd/xcluster-cni.yaml > $tmp/etc/kubernetes/xcluster-cni.yaml
+sed -e 's,:latest,:local,' < $topd/xcluster-cni-secondary-net.yaml > $tmp/etc/kubernetes/xcluster-cni-secondary-net.yaml
 
 cd $tmp
 tar cf "$1" *

@@ -71,12 +71,17 @@ cmd_test() {
 	test "$__xterm" = "yes" && start=start
 	rm -f $XCLUSTER_TMP/cdrom.iso
 
+	local t
 	if test -n "$1"; then
-		local t=$1
+		t=$1
 		shift
 		test_$t $@
 	else
-		test_start
+		unset __no_stop
+		for t in ping multilan install_secondary; do
+			tlog "========== test $t"
+			$me test $t
+		done
 	fi		
 
 	now=$(date +%s)
@@ -116,6 +121,7 @@ test_start_multilan() {
 ##     Start a multilan cluster and setup routing using "xcluster-cni
 ##     daemon" on eth2 and eth3
 test_start_routing() {
+	export INSTALL_BINARIES=yes
 	test_start_multilan $@
 	otc 1 "annotate eth2"
 	otcw "daemon eth2"
@@ -136,6 +142,23 @@ test_ping() {
 ##     POD addresses on net3 and net4 are ping'ed from main netns
 test_multilan() {
 	test_start_routing $@
+	otc 1 alpine2
+	otc 2 "collect_addresses net3"
+	otc 2 "collect_addresses net4"
+	otc 2 "ping_collected_addresses net3"
+	otc 2 "ping_collected_addresses net4"
+	xcluster_stop
+}
+##   test install_secondary
+
+##     Test installation for secondary network (only). Test re-start
+##     of the routing POD and verify that no re-installation of
+##     existing binaries are done
+test_install_secondary() {
+	test_start_multilan $@
+	otc 1 "annotate eth2"
+	otc 1 "annotate eth3"
+	otc 1 "install_secondary eth2 eth3"
 	otc 1 alpine2
 	otc 2 "collect_addresses net3"
 	otc 2 "collect_addresses net4"

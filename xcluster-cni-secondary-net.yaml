@@ -2,20 +2,29 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: xcluster-cni-secondary-net
-  namespace: kube-system
 spec:
   selector:
     matchLabels:
       app: xcluster-cni-secondary-net
   template:
     metadata:
-      namespace: kube-system
       labels:
         app: xcluster-cni-secondary-net
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       hostNetwork: true
+      initContainers:
+      - name: install
+        image: registry.nordix.org/cloud-native/xcluster-cni:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/xcluster-cni.sh", "install"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+         - mountPath: /cni/bin
+           name: cni-bin-dir
+           readOnly: false
       containers:
       - name: xcluster-cni
         image: registry.nordix.org/cloud-native/xcluster-cni:latest
@@ -32,6 +41,11 @@ spec:
           - name: ADDRESS_ANNOTATION
             value: "adr.example.com/eth2"
           - name: PROTOCOL
-            value: "203"
+            value: "210"
         securityContext:
           privileged: true
+      volumes:
+        - name: cni-bin-dir
+          hostPath:
+            path: /opt/cni/bin
+
