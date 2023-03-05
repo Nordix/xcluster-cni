@@ -124,6 +124,7 @@ cmd_tcase_daemon() {
 	local iface=$1
 	tcase "Start the xcluster-cni daemon in main netns [$iface]"
 	test -n "$iface" || tdie "No interface"
+	cp /etc/kubernetes/kubeconfig.token /etc/cni/net.d/xcluster-cni.kubeconfig
 	local net=$(echo $iface | tr -dc '0-9'); net=$((net + 1))
 	export PROTOCOL=$((net + 200))
 	export CIDR_ANNOTATION=cidr.example.com/$iface
@@ -181,7 +182,6 @@ cmd_tcase_install_secondary() {
 		proto=$((n + 210))
 		cat /etc/kubernetes/xcluster-cni-secondary-net.yaml | \
 			sed -e "s,eth2,$iface," -e "s,210,$proto," > $tmp/xcluster-cni.yaml
-		tlog "--trace=$__trace"
 		test "$__trace" = "yes" && \
 			sed -i -e 's,debug,trace,' $tmp/xcluster-cni.yaml
 		cat $tmp/xcluster-cni.yaml
