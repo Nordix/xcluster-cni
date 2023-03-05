@@ -33,17 +33,63 @@ log() {
 cmd_env() {
 	test "$cmd" = "env" && set | grep -E '^(__.*|K8S_NODE)='
 }
+##   generate_kubeconfig [--path=/cni/net.d/xcluster-cni.kubeconfig]
+##     Generate a kubeconfig file
+cmd_generate_kubeconfig() {
+	# Seems to originate from;
+	# https://github.com/projectcalico/cni-plugin/blob/be4df4db2e47aa7378b1bdf6933724bac1f348d0/k8s-install/scripts/install-cni.sh#L104-L153
+	test -n "$__path" || __path=/cni/net.d/xcluster-cni.kubeconfig
+	log "Generate kubeconfig; $__path"
+	mkdir -p $(dirname $__path) || die "mkdir $(dirname $__path)"
+	local sa=/var/run/secrets/kubernetes.io/serviceaccount
+	KUBE_CA_FILE=$sa/ca.crt
+	SKIP_TLS_VERIFY=false
+	# Pull out service account token.
+	SERVICEACCOUNT_TOKEN=$(cat $sa/token)
+
+  test -f "$KUBE_CA_FILE" && \
+      TLS_CFG="certificate-authority-data: $(cat $KUBE_CA_FILE | base64 | tr -d '\n')"
+
+  # Write a kubeconfig file for the CNI plugin.  Do this
+  # to skip TLS verification for now.  We should eventually support
+  # writing more complete kubeconfig files. This is only used
+  # if the provided CNI network config references it.
+  cat > $__path <<EOF
+apiVersion: v1
+kind: Config
+clusters:
+- name: local
+  cluster:
+    server: https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}
+    $TLS_CFG
+users:
+- name: multus
+  user:
+    token: "${SERVICEACCOUNT_TOKEN}"
+contexts:
+- name: multus-context
+  context:
+    cluster: local
+    user: multus
+current-context: multus-context
+EOF
+}
 ##   install
 ##     Install or upgrade the CNI-plugins. This is the initContainer
 ##     entry-point.
 cmd_install() {
 	if test -d /cni/net.d; then
 		echo "Checking K8s CNI-plugin"
-		if find /cni/net.d -maxdepth 1 -type f | sort | grep -q xcluster; then
-			echo "A Xcluster-cni already K8s CNI-plugin. Nothing updated"
+		if echo "$INSTALL_K8S_NET" | grep -qi no; then
+			cmd_generate_kubeconfig
 		else
-			echo "Installing xcluster-cni as K8s CNI-plugin"
-			cp /etc/cni/net.d/10-xcluster-cni.conf /cni/net.d
+			if find /cni/net.d -maxdepth 1 -type f | sort | grep -q xcluster; then
+				echo "A Xcluster-cni already K8s CNI-plugin. Nothing updated"
+			else
+				echo "Installing xcluster-cni as K8s CNI-plugin"
+				cp /etc/cni/net.d/10-xcluster-cni.conf /cni/net.d
+				cmd_generate_kubeconfig
+			fi
 		fi
 	else
 		echo "K8s CNI-plugin NOT installed"

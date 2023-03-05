@@ -11,6 +11,7 @@ spec:
     "ipam": {
       "type": "kube-node",
       "annotation": "cidr.example.com/eth2",
+      "kubeconfig": "/etc/cni/net.d/xcluster-cni.kubeconfig",
       "dataDir": "/run/container-ipam-state/bridge3"
     }
   }'

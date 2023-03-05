@@ -21,9 +21,15 @@ spec:
         command: ["/xcluster-cni.sh", "install"]
         securityContext:
           privileged: true
+        env:
+          - name: INSTALL_K8S_NET
+            value: "no"
         volumeMounts:
          - mountPath: /cni/bin
            name: cni-bin-dir
+           readOnly: false
+         - mountPath: /cni/net.d
+           name: cni-net-dir
            readOnly: false
       containers:
       - name: xcluster-cni
@@ -48,4 +54,7 @@ spec:
         - name: cni-bin-dir
           hostPath:
             path: /opt/cni/bin
+        - name: cni-net-dir
+          hostPath:
+            path: /etc/cni/net.d
 

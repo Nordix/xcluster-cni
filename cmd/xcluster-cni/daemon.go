@@ -70,6 +70,7 @@ func cmdDaemon(ctx context.Context, args []string) int {
 		logger.Error(err, "CreateNodeHandler")
 		return 1
 	}
+	// (no risk for race here since sync is delayed with minSyncInterval)
 	syncer.h = h
 
 	<-ctx.Done()
