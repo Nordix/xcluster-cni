@@ -1,0 +1,53 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  ipFamily: dual
+  # the default CNI will not be installed
+  disableDefaultCNI: true
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+containerdConfigPatches:
+- |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry-1.docker.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."k8s.gcr.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.nordix.org"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."ghcr.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."projects.registry.vmware.com"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."cr.fluentbit.io"]
+      endpoint = ["http://172.17.0.1"]
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."docker.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."registry-1.docker.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."k8s.gcr.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."gcr.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."registry.nordix.org".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."quay.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."ghcr.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."projects.registry.vmware.com".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."registry.k8s.io".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."cr.fluentbit.io".tls]
+      insecure_skip_verify = true
+
