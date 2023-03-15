@@ -45,11 +45,9 @@ spec:
       namespace: kube-system
       labels:
         app: xcluster-cni
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       tolerations:
         - effect: NoSchedule
           operator: Exists
@@ -60,6 +58,7 @@ spec:
       serviceAccountName: xcluster-cni
       serviceAccount: xcluster-cni
       hostNetwork: true
+      priorityClassName: system-node-critical
       initContainers:
       - name: install
         image: registry.nordix.org/cloud-native/xcluster-cni:latest
