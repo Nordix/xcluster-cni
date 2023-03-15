@@ -112,3 +112,33 @@ func shiftOr(b []byte, n uint64, shift int) {
 		inb--
 	}
 }
+
+// GetMTU Find the interface for the passed IP and return it's MTU
+func GetMTU(ip string) (int, error) {
+	adr := net.ParseIP(ip)
+	if adr == nil {
+		return 1500, fmt.Errorf("Invalid IP %s", ip)
+	}
+
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return 1500, err
+	}
+
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addrs {
+			_, n, err := net.ParseCIDR(a.String())
+			if err != nil {
+				continue
+			}
+			if n.Contains(adr) {
+				return iface.MTU, nil
+			}
+		}
+	}
+	return 1500, fmt.Errorf("MTU not found for %s", ip)
+}

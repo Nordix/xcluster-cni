@@ -73,6 +73,8 @@ cmd_binaries() {
 		-ldflags "-extldflags '-static' -X main.version=$__version $LDFLAGS" \
 		-o _output ./cmd/... || die "go build"
 	strip _output/*
+	local ver=$(_output/xcluster-cni version)
+	log "xcluster-cni binary version: $ver "
 }
 ##  image [--tag=image:version] [--plugin-tar=file]
 ##    Build the "xcluster-cni" image.

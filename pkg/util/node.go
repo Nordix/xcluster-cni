@@ -142,14 +142,14 @@ func (o *realNodeReader) GetNodes(ctx context.Context) ([]k8s.Node, error) {
 // GetNode Reads and returns a node object. Only one object is read, making
 // this more efficient than call GetNodes() and FindNode()
 func (o *realNodeReader) GetNode(ctx context.Context, name string) (*k8s.Node, error) {
-	if name != "" {
+	if name == "" {
 		return nil, fmt.Errorf("No name")
 	}
 
 	// Read just the selected node
 	api := GetApi(ctx)
 	nodes, err := api.Nodes().List(ctx, meta.ListOptions{
-		FieldSelector: "meta.name=" + name,
+		FieldSelector: "metadata.name=" + name,
 	})
 	if err != nil {
 		return nil, err

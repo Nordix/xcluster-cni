@@ -80,7 +80,7 @@ EOF
 cmd_install() {
 	if test -d /cni/net.d; then
 		echo "Checking K8s CNI-plugin"
-		if echo "$INSTALL_K8S_NET" | grep -qi no; then
+		if echo "$INSTALL_K8S_NET" | grep -qi -E 'no|false'; then
 			cmd_generate_kubeconfig
 		else
 			if find /cni/net.d -maxdepth 1 -type f | sort | grep -q xcluster; then
@@ -88,6 +88,11 @@ cmd_install() {
 			else
 				echo "Installing xcluster-cni as K8s CNI-plugin"
 				cp /etc/cni/net.d/10-xcluster-cni.conf /cni/net.d
+				local mtu=$(xcluster-cni k8smtu)
+				if test $mtu -ne 1500; then
+					echo "Set MTU=$mtu"
+					sed -i -e "s,1500,$mtu," /cni/net.d/10-xcluster-cni.conf
+				fi
 				cmd_generate_kubeconfig
 			fi
 		fi

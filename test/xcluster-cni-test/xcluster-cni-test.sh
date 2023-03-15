@@ -98,13 +98,18 @@ test_start_empty() {
 	otc 1 check_nodes
 	otcr vip_routes
 }
-##   test start_cni
-##     Start cluster with separate master. To enable xcluster-cni do;
-##     export xcluster_CNI_INFO=xcluster-cni-test
+##   test start_cni [cni-ovl]
+##     Start cluster with separate master. If no cni-ovl is specified
+##     nodes may never be "Ready"
 test_start_cni() {
 	test -n "$__nvm" || export __nvm=5
+	test -n "$__nrouters" || export __nrouters=1
+	export xcluster_PREFIX=$PREFIX
 	export __image=$XCLUSTER_HOME/hd-k8s-xcluster.img
-	test_start_empty $@
+	cd $dir
+	xcluster_start . $@
+	otc 1 check_namespaces
+	otcr vip_routes
 	otc 1 version
 }
 ##   test start_multilan
@@ -128,11 +133,12 @@ test_start_routing() {
 	otc 1 "annotate eth3"
 	otcw "daemon eth3"
 }
-##   test ping
+##   test ping [cni-ovl]
 ##     Start with xcluster-cni and test ping between PODs
 test_ping() {
-	export xcluster_CNI_INFO=xcluster-cni-test
+	test -n "$1" || export xcluster_CNI_INFO=xcluster-cni-test
 	test_start_cni $@
+	otc 1 check_nodes
 	otc 1 start_alpine
 	otc 1 "collect_addresses --app=alpine eth0"
 	otc 1 ping

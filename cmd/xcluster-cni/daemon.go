@@ -13,11 +13,11 @@ import (
 )
 
 /*
-   cmdDaemon The routing daemon watches the K8s node objects for node
-   addresses and POD network CIDRs. Addresses and CIDR can be read
-   from annotations or the K8s fields. The routing daemon configures
-   routes for POD network CIDRs to node addresses for IPv4 and IPv6.
- */
+	cmdDaemon The routing daemon watches the K8s node objects for node
+	addresses and POD network CIDRs. Addresses and CIDR can be read
+	from annotations or the K8s fields. The routing daemon configures
+	routes for POD network CIDRs to node addresses for IPv4 and IPv6.
+*/
 func cmdDaemon(ctx context.Context, args []string) int {
 	logger := logr.FromContextOrDiscard(ctx)
 	logger.Info("Xcluster-cni daemon started", "pid", os.Getpid())
@@ -34,19 +34,19 @@ func cmdDaemon(ctx context.Context, args []string) int {
 		return 1
 	}
 	sh := syncHandler{
-		protocol: protocol,
-		cidrAnnotation: os.Getenv("CIDR_ANNOTATION"),
+		protocol:          protocol,
+		cidrAnnotation:    os.Getenv("CIDR_ANNOTATION"),
 		addressAnnotation: os.Getenv("ADDRESS_ANNOTATION"),
-		rh: rh,
+		rh:                rh,
 	}
 	syncer := syncer{
 		sh: &sh,
 		// The capacity is just one to make sure the channel is
 		// drained on each sync. Non-blocking sending is used
-		ch: make(chan struct{}, 1),
+		ch:       make(chan struct{}, 1),
 		lastSync: time.Now(),
 	}
-	go syncer.run(ctx)			// Start the syncing go function
+	go syncer.run(ctx) // Start the syncing go function
 
 	// Start watching Nodes
 	clientset, err := util.GetClientset()
@@ -83,11 +83,12 @@ func cmdDaemon(ctx context.Context, args []string) int {
 // routine that reads all node objects and sets up or update routes.
 // Consecutive syncs are at least 'minSyncInterval' apart.
 type syncer struct {
-	h     util.Handler
-	ch    chan struct{}
-	sh    *syncHandler
+	h        util.Handler
+	ch       chan struct{}
+	sh       *syncHandler
 	lastSync time.Time
 }
+
 const minSyncInterval = time.Second * 5
 
 // trig Trigs a route sync. Called on any K8s node object update
@@ -118,7 +119,7 @@ func (s *syncer) run(ctx context.Context) {
 	}
 }
 
-// sync 
+// sync
 func (s *syncer) sync(ctx context.Context) {
 	logger := logr.FromContextOrDiscard(ctx)
 	// Delay if necessary to ensure syncs are more than

@@ -40,7 +40,7 @@ kubectl apply -n kube-system -f https://raw.githubusercontent.com/Nordix/xcluste
 
 
 
-### Multi Networking
+## Multi Networking
 
 A key feature is **multi networking**. `Xcluster-cni` can be installed
 on different interfaces on K8s nodes and can create POD-POD
@@ -77,20 +77,47 @@ The `protocol` is used to handle routes and must be unique for each
 
 
 
-### Network overlay
+## Network overlay
 
 `xcluster-cni` does not setup a network overlay, but you may configure
 an overlay yourself (e.g. vxlan) and use the `ADDRESS_ANNOTATION`
-environment variable to stear traffic to the overlay. An MTU adjustment
-is probably needed.
+environment variable to stear traffic to the overlay.
 
 This area will see some improvements in the future.
 
-### Network policies
+## Network policies
 
 K8s [network policies](
 https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 are not supported.
+
+## MTU
+
+If `xcluster-cni` is installed as main K8s CNI-plugin MTU is
+handled. You may check with:
+
+```
+# cat /etc/cni/net.d/10-xcluster-cni.conf 
+{
+    "cniVersion": "0.4.0",
+    "name": "xcluster",
+    "type": "bridge",
+    "bridge": "cbr0",
+    "isGateway": true,
+    "mtu": 9000,
+    "hairpinMode": true,
+    "isDefaultGateway": true,
+    "ipam": {
+        "type": "kube-node",
+        "kubeconfig": "/etc/cni/net.d/xcluster-cni.kubeconfig",
+        "dataDir": "/run/container-ipam-state/xcluster"
+    }
+}
+```
+In this example "jumbo-frames" with mtu=9000 are used.
+
+For secondary networks the MTU must be set in the Multus NAD object
+and is the users responsibility.
 
 
 ## Build the xcluster-cni image
