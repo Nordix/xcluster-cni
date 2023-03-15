@@ -98,10 +98,10 @@ test_start_empty() {
 	otc 1 check_nodes
 	otcr vip_routes
 }
-##   test start
-##     Start cluster xcluster-cni
-test_start() {
-	export xcluster_CNI_INFO=xcluster-cni-test
+##   test start_cni
+##     Start cluster with separate master. To enable xcluster-cni do;
+##     export xcluster_CNI_INFO=xcluster-cni-test
+test_start_cni() {
 	test -n "$__nvm" || export __nvm=5
 	export __image=$XCLUSTER_HOME/hd-k8s-xcluster.img
 	test_start_empty $@
@@ -131,7 +131,8 @@ test_start_routing() {
 ##   test ping
 ##     Start with xcluster-cni and test ping between PODs
 test_ping() {
-	test_start $@
+	export xcluster_CNI_INFO=xcluster-cni-test
+	test_start_cni $@
 	otc 1 start_alpine
 	otc 1 "collect_addresses --app=alpine eth0"
 	otc 1 ping
@@ -150,9 +151,7 @@ test_multilan() {
 	xcluster_stop
 }
 ##   test install_secondary
-##     Test installation for secondary network (only). Test re-start
-##     of the routing POD and verify that no re-installation of
-##     existing binaries are done
+##     Test installation for secondary network (only).
 test_install_secondary() {
 	test_start_multilan $@
 	otc 1 "annotate eth2"
@@ -166,7 +165,8 @@ test_install_secondary() {
 	xcluster_stop
 }
 ##   test restart_pod
-##     Re-start a POD and verify that no binaries are re-installed
+##     Re-start a POD and verify that no re-installation of existing
+##     binaries are done
 test_restart_pod() {
 	test_start_multilan $@
 	otc 1 "annotate eth2"
