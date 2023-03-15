@@ -51,7 +51,7 @@ objects:
 
 ```
 kubectl annotate node vm-003 cidr.example.com/net3=192.168.55.0/26,fd00:5::1:0/112
-kubectl annotate node vm-003 node-ip.nordix.org/net3=192.168.2.3,1000::1:c0a8:203
+kubectl annotate node vm-003 adr.example.com/net3=192.168.2.3,1000::1:c0a8:203
 ```
 
 and configuring the annotation names as environment variables:
