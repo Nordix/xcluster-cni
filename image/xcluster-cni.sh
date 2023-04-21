@@ -43,16 +43,16 @@ cmd_generate_kubeconfig() {
 	mkdir -p $(dirname $__path) || die "mkdir $(dirname $__path)"
 	local sa=/var/run/secrets/kubernetes.io/serviceaccount
 	KUBE_CA_FILE=$sa/ca.crt
-	SKIP_TLS_VERIFY=false
 	# Pull out service account token.
 	SERVICEACCOUNT_TOKEN=$(cat $sa/token)
 
-  test -f "$KUBE_CA_FILE" && \
-      TLS_CFG="certificate-authority-data: $(cat $KUBE_CA_FILE | base64 | tr -d '\n')"
+	TLS_CFG="insecure-skip-tls-verify: true"
+	test -f "$KUBE_CA_FILE" && \
+		TLS_CFG="certificate-authority-data: $(cat $KUBE_CA_FILE | base64 | tr -d '\n')"
 
-  # Write a kubeconfig file for the CNI plugin.  Do this
-  # to skip TLS verification for now.  We should eventually support
-  # writing more complete kubeconfig files. This is only used
+	# Write a kubeconfig file for the CNI plugin.  Do this
+	# to skip TLS verification for now.  We should eventually support
+	# writing more complete kubeconfig files. This is only used
   # if the provided CNI network config references it.
   cat > $__path <<EOF
 apiVersion: v1
@@ -60,7 +60,7 @@ kind: Config
 clusters:
 - name: local
   cluster:
-    server: https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}
+    server: https://[${KUBERNETES_SERVICE_HOST}]:${KUBERNETES_SERVICE_PORT}
     $TLS_CFG
 users:
 - name: multus
